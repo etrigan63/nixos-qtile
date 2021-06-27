@@ -2,13 +2,12 @@
  { config, pkgs, ... }:
 
 {
-  nix.nixPath =  [ "/home/kamil" "nixos-config=/etc/nixos/configuration.nix" ];
+  nix.nixPath =  [ "/home/guru" "nixos-config=/etc/nixos/configuration.nix" ];
   nix.useSandbox = true;
 
   imports =
     [
       ./hardware-configuration.nix
-      ./dnsmasq-configuration.nix
       
       <nixpkgs/nixos/modules/programs/command-not-found/command-not-found.nix>
     ];
@@ -30,7 +29,7 @@
   boot = {
     vesa = false;
 
-    kernelPackages = pkgs.linuxPackages_4_20;
+    kernelPackages = pkgs.linuxPackages_latest;
 
     kernelParams = [
       "i915.enable_ips=0"
@@ -58,32 +57,26 @@
     cleanTmpDir = true;
   };
 
-  time.timeZone = "Europe/Warsaw";
+  time.timeZone = "America/New_York";
 
-  system.stateVersion = "19.03";
+  system.stateVersion = "21.05";
 
   networking = {
-    hostName = "black";
+    hostName = "nixie";
     extraHosts = ''
-      127.0.0.1   black
+      127.0.0.1   nixie
     '';
     networkmanager = {
       enable = true;
-      unmanaged = [ "interface-name:ve*" "interface-name:vboxnet*" ]; 
-    };
-    firewall = {
-      allowedTCPPorts = [ 8080 ];
-      trustedInterfaces = [ "docker0" ];
-      checkReversePath = false;
     };
   };
 
   # Select internationalisation properties.
-  i18n = {
-    consoleFont = "lat9w-16";
-    consoleKeyMap = "pl";
-    defaultLocale = "pl_PL.UTF-8";
-  };
+  #i18n = {
+  #  consoleFont = "lat9w-16";
+  #  consoleKeyMap = "pl";
+  #  defaultLocale = "pl_PL.UTF-8";
+  #};
 
   nixpkgs.config = { 
     allowUnfree = true;
@@ -96,12 +89,14 @@
       xlibs.xf86videointel
       vaapiIntel
       libdrm
-      xscreensaver
+      betterlockscreen
+      xidlehook
+      caffeine-ng
+      kitty
       pmutils
       networkmanagerapplet
       openconnect
       networkmanager_openconnect
-      ntfs3g
       gtk-engine-murrine
       git
       tig
@@ -130,18 +125,18 @@
 
       videoDrivers = [ "intel" ];
       
-      layout = "pl";
+      layout = "en";
       
       libinput.enable = true;
       synaptics.enable = false;
-      inputClassSections = [
-        ''
-          Identifier "Enable libinput for TrackPoint"
-          MatchIsPointer "on"
-          Driver "libinput"
-          Option "Accel Speed" "-0.4"
-        ''
-      ];
+      #inputClassSections = [
+      #  ''
+      #    Identifier "Enable libinput for TrackPoint"
+      #    MatchIsPointer "on"
+      #    Driver "libinput"
+      #    Option "Accel Speed" "-0.4"
+      #  ''
+      #];
 
       desktopManager.xfce.enable = true;
       windowManager.qtile.enable = true;
@@ -150,8 +145,8 @@
         xscreensaver -no-splash &
       '';
 
-      displayManager.slim.enable = true;
-      displayManager.slim.extraConfig = ''
+      displayManager.sddm.enable = true;
+      displayManager.sddm.extraConfig = ''
         sessionstart_cmd    ${pkgs.xorg.sessreg}/bin/sessreg -a -l tty7 %user
         sessionstop_cmd     ${pkgs.xorg.sessreg}/bin/sessreg -d -l tty7 %user
       '';
@@ -182,18 +177,18 @@
     ];
   };
 
-  virtualisation.docker = {
-    enable = true;
-    storageDriver = "overlay";
-    extraOptions = "--dns 172.17.0.1";
-  };
-  virtualisation.virtualbox.host.enable = true;
-  virtualisation.libvirtd = {
-    enable = true;
-    qemuPackage = pkgs.qemu_kvm;
-  };
+  #virtualisation.docker = {
+  #  enable = true;
+  #  storageDriver = "overlay";
+  #  extraOptions = "--dns 172.17.0.1";
+  #};
+  #virtualisation.virtualbox.host.enable = true;
+  #virtualisation.libvirtd = {
+  #  enable = true;
+  #  qemuPackage = pkgs.qemu_kvm;
+  #};
 
-  users.extraUsers.kamil = {
+  users.extraUsers.guru = {
     isNormalUser = true;
     uid = 1000;
     extraGroups = [ "wheel" "networkmanager" "audio" "video" "lp" "power" "disk" "storage" "plugdev" "docker" "libvirtd" "kvm" ];
